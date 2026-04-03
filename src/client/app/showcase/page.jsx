@@ -2,13 +2,22 @@ import React, { useState } from 'react';
 import Badge from '../../components/Badge.jsx';
 import Button from '../../components/Button.jsx';
 import Card from '../../components/Card.jsx';
+import Checkbox from '../../components/Checkbox.jsx';
 import FeatureItem from '../../components/FeatureItem.jsx';
+import RadioGroup from '../../components/RadioGroup.jsx';
 import SectionHeader from '../../components/SectionHeader.jsx';
+import Select from '../../components/Select.jsx';
 import StatCard from '../../components/StatCard.jsx';
+import TextArea from '../../components/TextArea.jsx';
 import TextInput from '../../components/TextInput.jsx';
 
 export default function ShowcasePage() {
   const [value, setValue] = useState('');
+  const [notes, setNotes] = useState('');
+  const [plan, setPlan] = useState('starter');
+  const [role, setRole] = useState('developer');
+  const [agreed, setAgreed] = useState(true);
+  const [updates, setUpdates] = useState(false);
 
   return (
     <section className="space-y-8">
@@ -21,7 +30,7 @@ export default function ShowcasePage() {
       <div className="grid gap-4 md:grid-cols-3">
         <StatCard
           label="Components"
-          value="7"
+          value="11"
           detail="Reusable UI primitives and composites currently available in the client layer."
           tone="cyan"
         />
@@ -60,21 +69,89 @@ export default function ShowcasePage() {
               Form Controls
             </p>
             <h3 className="text-xl font-semibold text-slate-950 dark:text-white">
-              Input and button
+              Input, select, textarea, checkbox, radio, and button
             </h3>
           </div>
-          <div className="flex flex-col gap-3 sm:flex-row">
+          <div className="grid gap-3 sm:grid-cols-2">
             <TextInput
               value={value}
               onChange={(e) => setValue(e.target.value)}
-              placeholder="Type to preview component styling"
+              placeholder="Project name"
             />
-            <Button onClick={() => setValue('Tailwind components ready')}>
-              Fill Demo
-            </Button>
+            <Select value={plan} onChange={(e) => setPlan(e.target.value)}>
+              <option value="starter">Starter Plan</option>
+              <option value="team">Team Plan</option>
+              <option value="enterprise">Enterprise Plan</option>
+            </Select>
+          </div>
+          <TextArea
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            placeholder="Add project notes"
+          />
+          <div className="grid gap-4 lg:grid-cols-2">
+            <RadioGroup
+              label="Role"
+              name="role"
+              value={role}
+              onChange={setRole}
+              options={[
+                {
+                  value: 'developer',
+                  label: 'Developer',
+                  description: 'Focused on implementation and integration work.'
+                },
+                {
+                  value: 'designer',
+                  label: 'Designer',
+                  description: 'Focused on interface polish and component presentation.'
+                }
+              ]}
+            />
+            <div className="space-y-3">
+              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
+                Preferences
+              </p>
+              <Checkbox
+                checked={agreed}
+                onChange={(e) => setAgreed(e.target.checked)}
+                label="Accept component defaults"
+                hint="Uses the library spacing, border radius, and color treatment."
+              />
+              <Checkbox
+                checked={updates}
+                onChange={(e) => setUpdates(e.target.checked)}
+                label="Send UI updates"
+                hint="Example secondary checkbox state for settings forms."
+              />
+            </div>
+          </div>
+          <Button className="w-full sm:w-auto" onClick={() => {
+            setValue('Tailwind Form Kit');
+            setPlan('team');
+            setRole('designer');
+            setAgreed(true);
+            setUpdates(true);
+            setNotes('Reusable form components with consistent light and dark theme styling.');
+          }}>
+            Fill Demo
+          </Button>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <p className="text-sm text-slate-600 dark:text-slate-300">
+              Project: <span className="font-semibold">{value || 'Empty'}</span>
+            </p>
+            <p className="text-sm text-slate-600 dark:text-slate-300">
+              Plan: <span className="font-semibold capitalize">{plan}</span>
+            </p>
+            <p className="text-sm text-slate-600 dark:text-slate-300">
+              Role: <span className="font-semibold capitalize">{role}</span>
+            </p>
+            <p className="text-sm text-slate-600 dark:text-slate-300">
+              Updates: <span className="font-semibold">{updates ? 'Enabled' : 'Disabled'}</span>
+            </p>
           </div>
           <p className="text-sm text-slate-600 dark:text-slate-300">
-            Current value: <span className="font-semibold">{value || 'Empty'}</span>
+            Notes: <span className="font-semibold">{notes || 'Empty'}</span>
           </p>
         </Card>
 
