@@ -3,6 +3,7 @@ import { NavLink, Route, Routes, StaticRouter } from 'react-router-dom';
 import HomePage from './app/page.jsx';
 import AboutPage from './app/about/page.jsx';
 import ItemsPage from './app/items/page.jsx';
+import ShowcasePage from './app/showcase/page.jsx';
 import NotFoundPage from './app/not-found.jsx';
 import ThemeToggle from './theme/ThemeToggle.jsx';
 import { ThemeProvider } from './theme/ThemeProvider.jsx';
@@ -42,6 +43,9 @@ function AppShell({ items = [] }) {
                 <NavLink to="/items" className={navLinkClassName}>
                   Items
                 </NavLink>
+                <NavLink to="/showcase" className={navLinkClassName}>
+                  Showcase
+                </NavLink>
               </nav>
               <ThemeToggle />
             </div>
@@ -53,6 +57,7 @@ function AppShell({ items = [] }) {
             <Route path="/" element={<HomePage />} />
             <Route path="/about" element={<AboutPage />} />
             <Route path="/items" element={<ItemsPage items={items} />} />
+            <Route path="/showcase" element={<ShowcasePage />} />
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </main>
