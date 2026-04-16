@@ -7,6 +7,8 @@ import ShowcasePage from './app/showcase/page.jsx';
 import NotFoundPage from './app/not-found.jsx';
 import ThemeToggle from './theme/ThemeToggle.jsx';
 import { ThemeProvider } from './theme/ThemeProvider.jsx';
+import ErrorBoundary from './components/ErrorBoundary.jsx';
+import { ToastProvider } from './context/ToastContext.jsx';
 
 function AppShell({ items = [] }) {
   const navLinkClassName = ({ isActive }) =>
@@ -69,7 +71,11 @@ function AppShell({ items = [] }) {
 export default function App({ items = [], location }) {
   const appShell = (
     <ThemeProvider>
-      <AppShell items={items} />
+      <ToastProvider>
+        <ErrorBoundary>
+          <AppShell items={items} />
+        </ErrorBoundary>
+      </ToastProvider>
     </ThemeProvider>
   );
 
