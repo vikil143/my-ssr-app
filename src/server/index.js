@@ -89,6 +89,14 @@ app.get(/^\/(?!api).*/, async (req, res) => {
   res.send(renderPage(html, { items }));
 });
 
+// ── Global error handler ─────────────────────────────────────────────────────
+// Must be defined after all routes. Catches any error passed via next(err).
+app.use((err, req, res, next) => {
+  console.error(err);
+  const status = err.status || err.statusCode || 500;
+  res.status(status).json({ message: err.message || 'Internal server error.' });
+});
+
 connect().then(() => {
   preRenderPages();
   app.listen(process.env.PORT || 3000, () =>

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Link, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import Button from '../../components/Button.jsx';
 import TextInput from '../../components/TextInput.jsx';
 import { useAuth } from '../../context/AuthContext.jsx';
@@ -25,8 +25,7 @@ export default function LoginPage() {
   // If already logged in, redirect away from this page
   if (user) {
     const dest = location.state?.from?.pathname || '/items';
-    navigate(dest, { replace: true });
-    return null;
+    return <Navigate to={dest} replace />;
   }
 
   async function handleSubmit(e) {

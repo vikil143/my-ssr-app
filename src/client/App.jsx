@@ -26,7 +26,7 @@ function UserMenu() {
           className={({ isActive }) =>
             `rounded-full px-4 py-2 text-sm font-medium transition ${
               isActive
-                ? 'bg-cyan-500 text-white shadow-lg shadow-cyan-500/30 dark:bg-cyan-400 dark:text-slate-950'
+                ? 'bg-cyan-500 text-witemshite shadow-lg shadow-cyan-500/30 dark:bg-cyan-400 dark:text-slate-950'
                 : 'text-slate-600 hover:bg-slate-900/5 hover:text-slate-950 dark:text-slate-300 dark:hover:bg-white/10 dark:hover:text-white'
             }`
           }

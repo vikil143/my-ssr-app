@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, Navigate, useNavigate } from 'react-router-dom';
 import Button from '../../components/Button.jsx';
 import TextInput from '../../components/TextInput.jsx';
 import { useAuth } from '../../context/AuthContext.jsx';
@@ -25,8 +25,7 @@ export default function RegisterPage() {
 
   // Already logged in — send them away
   if (user) {
-    navigate('/items', { replace: true });
-    return null;
+    return <Navigate to="/items" replace />;
   }
 
   async function handleSubmit(e) {
