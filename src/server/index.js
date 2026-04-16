@@ -28,18 +28,27 @@ app.use('/api/auth', authRouter);
 app.use('/api/tasks', tasksRouter);
 
 // ── Items API (kept for backward compatibility) ──────────────────────────────
-app.get('/api/items', async (req, res) => {
-  const items = await Item.find().lean();
-  res.json(items);
+app.get('/api/items', async (req, res, next) => {
+  try {
+    const items = await Item.find().sort({ createdAt: -1 }).lean();
+    res.json(items);
+  } catch (err) {
+    next(err);
+  }
 });
 
-app.post('/api/items', requireAuth, async (req, res) => {
-  const { name } = req.body;
-  if (!name || !String(name).trim()) {
-    return res.status(400).json({ message: 'Item name is required.' });
+app.post('/api/items', requireAuth, async (req, res, next) => {
+  try {
+    const { name } = req.body;
+    const trimmed = String(name ?? '').trim();
+    if (!trimmed) {
+      return res.status(400).json({ message: 'Item name is required.' });
+    }
+    const item = await Item.create({ name: trimmed });
+    res.status(201).json(item);
+  } catch (err) {
+    next(err);
   }
-  const item = await Item.create({ name: String(name).trim() });
-  res.status(201).json(item);
 });
 
 // ── SSR ─────────────────────────────────────────────────────────────────────
@@ -107,6 +116,20 @@ app.get(/^\/(?!api).*/, async (req, res) => {
 
 // ── Global error handler ─────────────────────────────────────────────────────
 app.use((err, req, res, next) => {
+  // Mongoose validation errors → 400
+  if (err.name === 'ValidationError') {
+    const message = Object.values(err.errors).map((e) => e.message).join(' ');
+    return res.status(400).json({ message });
+  }
+  // Mongoose duplicate key (e.g. unique email) → 409
+  if (err.code === 11000) {
+    return res.status(409).json({ message: 'A record with that value already exists.' });
+  }
+  // Mongoose bad ObjectId cast → 400
+  if (err.name === 'CastError') {
+    return res.status(400).json({ message: 'Invalid ID format.' });
+  }
+
   console.error(err);
   const status = err.status || err.statusCode || 500;
   res.status(status).json({ message: err.message || 'Internal server error.' });

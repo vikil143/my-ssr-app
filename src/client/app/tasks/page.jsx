@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import Badge    from '../../components/Badge.jsx';
-import Button   from '../../components/Button.jsx';
-import Card     from '../../components/Card.jsx';
+import React, { useState, useEffect } from 'react';
+import Badge     from '../../components/Badge.jsx';
+import Button    from '../../components/Button.jsx';
+import Card      from '../../components/Card.jsx';
 import TextInput from '../../components/TextInput.jsx';
 import TextArea  from '../../components/TextArea.jsx';
 import Select    from '../../components/Select.jsx';
@@ -22,7 +22,7 @@ const STATUS_NEXT   = { todo: 'in-progress', 'in-progress': 'done', done: 'todo'
 const STATUS_LABELS = { todo: 'To Do', 'in-progress': 'In Progress', done: 'Done' };
 const STATUS_TABS   = ['all', 'todo', 'in-progress', 'done'];
 
-const SCHEMA = {
+const CREATE_SCHEMA = {
   title: [
     'required',
     (v) => (v && v.length < 2 ? 'Title must be at least 2 characters.' : null),
@@ -34,19 +34,58 @@ const SCHEMA = {
 export default function TasksPage({ tasks: initialTasks }) {
   const { addToast } = useToast();
 
-  const [tasks, setTasks]           = useState(initialTasks || []);
-  const [listLoading, setListLoading] = useState(false);
-  const [statusFilter, setStatusFilter]   = useState('all');
+  // ── List state ──────────────────────────────────────────────────────────────
+  const [tasks, setTasks] = useState(initialTasks || []);
+  // Show skeleton on mount only when there is no SSR data (client-side navigation)
+  const [listLoading, setListLoading] = useState(!(initialTasks?.length > 0));
+  const [statusFilter, setStatusFilter]     = useState('all');
   const [priorityFilter, setPriorityFilter] = useState('all');
-  const [showForm, setShowForm]     = useState(false);
-  const [submitting, setSubmitting] = useState(false);
-  const [selPriority, setSelPriority]   = useState('medium');
-  const [description, setDescription]   = useState('');
+
+  // ── Create form state ────────────────────────────────────────────────────────
+  const [showForm, setShowForm]       = useState(false);
+  const [submitting, setSubmitting]   = useState(false);
+  const [selPriority, setSelPriority] = useState('medium');
+  const [description, setDescription] = useState('');
+
+  // ── Edit state ───────────────────────────────────────────────────────────────
+  const [editingId, setEditingId]           = useState(null);
+  const [editValues, setEditValues]         = useState({ title: '', description: '', priority: 'medium' });
+  const [editSubmitting, setEditSubmitting] = useState(false);
+
+  // ── Delete confirmation state ────────────────────────────────────────────────
+  const [deletingId, setDeletingId] = useState(null);
 
   const { values, errors, handleChange, handleBlur, validate, reset } =
-    useFormValidation(SCHEMA);
+    useFormValidation(CREATE_SCHEMA);
 
-  // ── Derived data ────────────────────────────────────────────────────────────
+  // ── Auto-fetch on mount ──────────────────────────────────────────────────────
+  // Covers client-side navigation (no SSR) and keeps the list fresh after hydration.
+  // When SSR data is present listLoading is already false, so the fetch runs silently
+  // in the background without showing a skeleton.
+  useEffect(() => {
+    let cancelled = false;
+
+    apiFetch('/api/tasks')
+      .then((data) => {
+        if (!cancelled) setTasks(data);
+      })
+      .catch((err) => {
+        // Only show the error toast when we have nothing to show the user
+        if (!cancelled && !(initialTasks?.length > 0)) {
+          addToast(
+            err instanceof ApiError ? err.message : 'Failed to load tasks.',
+            'error'
+          );
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setListLoading(false);
+      });
+
+    return () => { cancelled = true; };
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ── Derived data ─────────────────────────────────────────────────────────────
 
   const filtered = tasks.filter((t) => {
     const sOk = statusFilter === 'all'   || t.status   === statusFilter;
@@ -55,13 +94,13 @@ export default function TasksPage({ tasks: initialTasks }) {
   });
 
   const counts = {
-    all:          tasks.length,
-    todo:         tasks.filter((t) => t.status === 'todo').length,
+    all:           tasks.length,
+    todo:          tasks.filter((t) => t.status === 'todo').length,
     'in-progress': tasks.filter((t) => t.status === 'in-progress').length,
     done:          tasks.filter((t) => t.status === 'done').length,
   };
 
-  // ── Handlers ────────────────────────────────────────────────────────────────
+  // ── Handlers ─────────────────────────────────────────────────────────────────
 
   async function handleRefresh() {
     setListLoading(true);
@@ -74,6 +113,8 @@ export default function TasksPage({ tasks: initialTasks }) {
       setListLoading(false);
     }
   }
+
+  // ── Create ──────────────────────────────────────────────────────────────────
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -101,30 +142,98 @@ export default function TasksPage({ tasks: initialTasks }) {
     }
   }
 
+  // ── Status cycle (optimistic update) ────────────────────────────────────────
+
   async function handleStatusCycle(task) {
     const nextStatus = STATUS_NEXT[task.status];
+
+    // Apply optimistically so the UI responds instantly
+    setTasks((prev) =>
+      prev.map((t) => (t._id === task._id ? { ...t, status: nextStatus } : t))
+    );
+
     try {
       const updated = await apiFetch(`/api/tasks/${task._id}`, {
         method: 'PUT',
         body: JSON.stringify({ status: nextStatus }),
       });
+      // Replace with the server's version (has correct updatedAt etc.)
       setTasks((prev) => prev.map((t) => (t._id === updated._id ? updated : t)));
     } catch (err) {
+      // Revert to the original status on failure
+      setTasks((prev) =>
+        prev.map((t) => (t._id === task._id ? { ...t, status: task.status } : t))
+      );
       addToast(err instanceof ApiError ? err.message : 'Failed to update task.', 'error');
     }
   }
 
+  // ── Delete (two-click confirmation) ─────────────────────────────────────────
+
   async function handleDelete(taskId, taskTitle) {
+    // First click: arm the confirmation state
+    if (deletingId !== taskId) {
+      setDeletingId(taskId);
+      return;
+    }
+    // Second click on the same task: confirmed, execute
     try {
       await apiFetch(`/api/tasks/${taskId}`, { method: 'DELETE' });
       setTasks((prev) => prev.filter((t) => t._id !== taskId));
       addToast(`"${taskTitle}" deleted.`, 'success');
     } catch (err) {
       addToast(err instanceof ApiError ? err.message : 'Failed to delete task.', 'error');
+    } finally {
+      setDeletingId(null);
     }
   }
 
-  // ── Render ───────────────────────────────────────────────────────────────────
+  function handleDeleteCancel() {
+    setDeletingId(null);
+  }
+
+  // ── Edit ────────────────────────────────────────────────────────────────────
+
+  function handleEditStart(task) {
+    setEditingId(task._id);
+    setEditValues({
+      title:       task.title,
+      description: task.description || '',
+      priority:    task.priority,
+    });
+  }
+
+  async function handleEditSave(taskId) {
+    const title = editValues.title.trim();
+    if (!title || title.length < 2) {
+      addToast('Title must be at least 2 characters.', 'error');
+      return;
+    }
+    setEditSubmitting(true);
+    try {
+      const updated = await apiFetch(`/api/tasks/${taskId}`, {
+        method: 'PUT',
+        body: JSON.stringify({
+          title,
+          description: editValues.description.trim(),
+          priority:    editValues.priority,
+        }),
+      });
+      setTasks((prev) => prev.map((t) => (t._id === updated._id ? updated : t)));
+      addToast('Task updated.', 'success');
+      setEditingId(null);
+    } catch (err) {
+      addToast(err instanceof ApiError ? err.message : 'Failed to update task.', 'error');
+    } finally {
+      setEditSubmitting(false);
+    }
+  }
+
+  function handleEditCancel() {
+    setEditingId(null);
+  }
+
+  // ── Render ────────────────────────────────────────────────────────────────────
 
   return (
     <section className="space-y-8">
@@ -145,7 +254,7 @@ export default function TasksPage({ tasks: initialTasks }) {
         </Button>
       </div>
 
-      {/* ── Add Task form ── */}
+      {/* ── Create task form ── */}
       {showForm && (
         <Card as="div" className="space-y-5">
           <p className="text-xs font-semibold uppercase tracking-[0.15em] text-j-sub dark:text-slate-400">
@@ -207,7 +316,6 @@ export default function TasksPage({ tasks: initialTasks }) {
 
       {/* ── Filters ── */}
       <div className="flex flex-wrap items-center gap-3">
-        {/* Status tabs */}
         <div className="flex flex-wrap gap-2">
           {STATUS_TABS.map((s) => (
             <button
@@ -224,8 +332,6 @@ export default function TasksPage({ tasks: initialTasks }) {
             </button>
           ))}
         </div>
-
-        {/* Priority dropdown */}
         <div className="ml-auto">
           <Select
             value={priorityFilter}
@@ -253,7 +359,7 @@ export default function TasksPage({ tasks: initialTasks }) {
         </div>
 
         {listLoading ? (
-          <SkeletonList count={filtered.length || 3} />
+          <SkeletonList count={3} />
         ) : filtered.length === 0 ? (
           <p className="py-8 text-center text-sm text-j-mist dark:text-slate-400">
             {tasks.length === 0
@@ -268,6 +374,15 @@ export default function TasksPage({ tasks: initialTasks }) {
                 task={task}
                 onStatusCycle={handleStatusCycle}
                 onDelete={handleDelete}
+                onDeleteCancel={handleDeleteCancel}
+                deletingId={deletingId}
+                editingId={editingId}
+                editValues={editValues}
+                setEditValues={setEditValues}
+                editSubmitting={editSubmitting}
+                onEditStart={handleEditStart}
+                onEditSave={handleEditSave}
+                onEditCancel={handleEditCancel}
               />
             ))}
           </ul>
@@ -277,13 +392,96 @@ export default function TasksPage({ tasks: initialTasks }) {
   );
 }
 
-// ── Task card ────────────────────────────────────────────────────────────────
+// ── Task card ─────────────────────────────────────────────────────────────────
 
-function TaskCard({ task, onStatusCycle, onDelete }) {
-  const pc     = PRIORITY_CONFIG[task.priority] || PRIORITY_CONFIG.medium;
-  const isDone = task.status === 'done';
+function TaskCard({
+  task,
+  onStatusCycle,
+  onDelete,
+  onDeleteCancel,
+  deletingId,
+  editingId,
+  editValues,
+  setEditValues,
+  editSubmitting,
+  onEditStart,
+  onEditSave,
+  onEditCancel,
+}) {
+  const pc           = PRIORITY_CONFIG[task.priority] || PRIORITY_CONFIG.medium;
+  const isDone       = task.status === 'done';
   const isInProgress = task.status === 'in-progress';
+  const isEditing    = editingId === task._id;
+  const isDeleting   = deletingId === task._id;
 
+  // ── Edit mode ────────────────────────────────────────────────────────────────
+  if (isEditing) {
+    return (
+      <Card as="li" className="space-y-4">
+        <p className="text-xs font-semibold uppercase tracking-[0.15em] text-j-sub dark:text-slate-400">
+          Edit Task
+        </p>
+        <div className="space-y-3">
+          <TextInput
+            name={`edit-title-${task._id}`}
+            label="Title"
+            value={editValues.title}
+            onChange={(e) =>
+              setEditValues((v) => ({ ...v, title: e.target.value }))
+            }
+            disabled={editSubmitting}
+          />
+          <div>
+            <label className="mb-1.5 block text-xs font-medium text-j-sub dark:text-slate-400">
+              Description
+            </label>
+            <TextArea
+              value={editValues.description}
+              onChange={(e) =>
+                setEditValues((v) => ({ ...v, description: e.target.value }))
+              }
+              disabled={editSubmitting}
+              rows={2}
+            />
+          </div>
+          <div>
+            <label className="mb-1.5 block text-xs font-medium text-j-sub dark:text-slate-400">
+              Priority
+            </label>
+            <Select
+              value={editValues.priority}
+              onChange={(e) =>
+                setEditValues((v) => ({ ...v, priority: e.target.value }))
+              }
+              disabled={editSubmitting}
+            >
+              <option value="high">High</option>
+              <option value="medium">Medium</option>
+              <option value="low">Low</option>
+            </Select>
+          </div>
+          <div className="flex justify-end gap-2 pt-1">
+            <button
+              type="button"
+              onClick={onEditCancel}
+              disabled={editSubmitting}
+              className="inline-flex items-center justify-center rounded-[3px] border border-j-line px-4 py-1.5 text-sm font-medium text-j-blue transition hover:bg-j-snow disabled:opacity-50 dark:border-slate-600 dark:text-blue-400 dark:hover:bg-slate-800"
+            >
+              Cancel
+            </button>
+            <Button
+              onClick={() => onEditSave(task._id)}
+              disabled={editSubmitting}
+            >
+              {editSubmitting ? 'Saving…' : 'Save changes'}
+            </Button>
+          </div>
+        </div>
+      </Card>
+    );
+  }
+
+  // ── Normal / delete-confirm mode ─────────────────────────────────────────────
   return (
     <Card
       as="li"
@@ -329,11 +527,7 @@ function TaskCard({ task, onStatusCycle, onDelete }) {
           >
             {task.title}
           </span>
-
-          {/* Priority badge */}
           <Badge tone={pc.tone}>{pc.label}</Badge>
-
-          {/* Status label (shown only for non-default states) */}
           {task.status !== 'todo' && (
             <span
               className={`text-xs font-medium ${
@@ -346,7 +540,6 @@ function TaskCard({ task, onStatusCycle, onDelete }) {
             </span>
           )}
         </div>
-
         {task.description && (
           <p className="mt-1 line-clamp-2 text-xs leading-5 text-j-sub dark:text-slate-400">
             {task.description}
@@ -354,21 +547,62 @@ function TaskCard({ task, onStatusCycle, onDelete }) {
         )}
       </div>
 
-      {/* Delete button */}
-      <button
-        onClick={() => onDelete(task._id, task.title)}
-        title="Delete task"
-        className="shrink-0 rounded-[3px] p-1.5 text-j-mist transition hover:bg-[#FFEBE6] hover:text-j-red focus:outline-none focus-visible:ring-2 focus-visible:ring-j-red dark:text-slate-500 dark:hover:bg-red-500/10 dark:hover:text-red-400"
-      >
-        <svg viewBox="0 0 16 16" fill="none" className="h-4 w-4">
-          <path
-            d="M4 4l8 8M12 4l-8 8"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-          />
-        </svg>
-      </button>
+      {/* Action area */}
+      <div className="flex shrink-0 items-center gap-1">
+        {isDeleting ? (
+          /* Inline delete confirmation */
+          <div className="flex items-center gap-2 rounded-[3px] bg-[#FFEBE6] px-2 py-1">
+            <span className="text-xs font-medium text-j-red">Delete?</span>
+            <button
+              onClick={() => onDelete(task._id, task.title)}
+              className="text-xs font-semibold text-j-red underline hover:no-underline"
+            >
+              Yes
+            </button>
+            <button
+              onClick={onDeleteCancel}
+              className="text-xs font-semibold text-j-sub hover:text-j-ink dark:text-slate-400"
+            >
+              No
+            </button>
+          </div>
+        ) : (
+          <>
+            {/* Edit */}
+            <button
+              onClick={() => onEditStart(task)}
+              title="Edit task"
+              className="rounded-[3px] p-1.5 text-j-mist transition hover:bg-[#DEEBFF] hover:text-j-blue focus:outline-none focus-visible:ring-2 focus-visible:ring-j-sky dark:text-slate-500 dark:hover:bg-blue-400/10 dark:hover:text-blue-400"
+            >
+              <svg viewBox="0 0 16 16" fill="none" className="h-4 w-4">
+                <path
+                  d="M11.333 2a1.886 1.886 0 0 1 2.667 2.667L5.333 13.333H2.667V10.667L11.333 2Z"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </button>
+
+            {/* Delete */}
+            <button
+              onClick={() => onDelete(task._id, task.title)}
+              title="Delete task"
+              className="rounded-[3px] p-1.5 text-j-mist transition hover:bg-[#FFEBE6] hover:text-j-red focus:outline-none focus-visible:ring-2 focus-visible:ring-j-red dark:text-slate-500 dark:hover:bg-red-500/10 dark:hover:text-red-400"
+            >
+              <svg viewBox="0 0 16 16" fill="none" className="h-4 w-4">
+                <path
+                  d="M4 4l8 8M12 4l-8 8"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                />
+              </svg>
+            </button>
+          </>
+        )}
+      </div>
     </Card>
   );
 }

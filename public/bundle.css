@@ -912,6 +912,10 @@ video {
 .p-6 {
   padding: 1.5rem;
 }
+.px-2 {
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+}
 .px-2\.5 {
   padding-left: 0.625rem;
   padding-right: 0.625rem;
@@ -1092,6 +1096,9 @@ video {
 .text-white\/80 {
   color: rgb(255 255 255 / 0.8);
 }
+.underline {
+  text-decoration-line: underline;
+}
 .line-through {
   text-decoration-line: line-through;
 }
@@ -1155,6 +1162,10 @@ video {
   --tw-bg-opacity: 1;
   background-color: rgb(191 38 0 / var(--tw-bg-opacity, 1));
 }
+.hover\:bg-\[\#DEEBFF\]:hover {
+  --tw-bg-opacity: 1;
+  background-color: rgb(222 235 255 / var(--tw-bg-opacity, 1));
+}
 .hover\:bg-\[\#FFEBE6\]:hover {
   --tw-bg-opacity: 1;
   background-color: rgb(255 235 230 / var(--tw-bg-opacity, 1));
@@ -1177,6 +1188,14 @@ video {
 .hover\:bg-white\/20:hover {
   background-color: rgb(255 255 255 / 0.2);
 }
+.hover\:text-j-blue:hover {
+  --tw-text-opacity: 1;
+  color: rgb(0 82 204 / var(--tw-text-opacity, 1));
+}
+.hover\:text-j-ink:hover {
+  --tw-text-opacity: 1;
+  color: rgb(23 43 77 / var(--tw-text-opacity, 1));
+}
 .hover\:text-j-navy:hover {
   --tw-text-opacity: 1;
   color: rgb(7 71 166 / var(--tw-text-opacity, 1));
@@ -1191,6 +1210,9 @@ video {
 }
 .hover\:underline:hover {
   text-decoration-line: underline;
+}
+.hover\:no-underline:hover {
+  text-decoration-line: none;
 }
 .hover\:opacity-100:hover {
   opacity: 1;
@@ -1425,6 +1447,9 @@ video {
   --tw-border-opacity: 1;
   border-color: rgb(203 213 225 / var(--tw-border-opacity, 1));
 }
+.dark\:hover\:bg-blue-400\/10:hover:is(.dark *) {
+  background-color: rgb(96 165 250 / 0.1);
+}
 .dark\:hover\:bg-blue-700:hover:is(.dark *) {
   --tw-bg-opacity: 1;
   background-color: rgb(29 78 216 / var(--tw-bg-opacity, 1));
@@ -1447,6 +1472,10 @@ video {
 .dark\:hover\:bg-slate-800:hover:is(.dark *) {
   --tw-bg-opacity: 1;
   background-color: rgb(30 41 59 / var(--tw-bg-opacity, 1));
+}
+.dark\:hover\:text-blue-400:hover:is(.dark *) {
+  --tw-text-opacity: 1;
+  color: rgb(96 165 250 / var(--tw-text-opacity, 1));
 }
 .dark\:hover\:text-red-400:hover:is(.dark *) {
   --tw-text-opacity: 1;
