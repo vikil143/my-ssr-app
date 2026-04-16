@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Link, Navigate, useNavigate, useLocation } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import Button from '../../components/Button.jsx';
 import TextInput from '../../components/TextInput.jsx';
 import { useAuth } from '../../context/AuthContext.jsx';
@@ -13,20 +13,22 @@ const SCHEMA = {
 };
 
 export default function LoginPage() {
-  const { login, user } = useAuth();
-  const { addToast }    = useToast();
-  const navigate        = useNavigate();
-  const location        = useLocation();
+  const { login, user, loading } = useAuth();
+  const { addToast }             = useToast();
+  const navigate                 = useNavigate();
+  const location                 = useLocation();
   const [submitting, setSubmitting] = useState(false);
 
   const { values, errors, handleChange, handleBlur, validate } =
     useFormValidation(SCHEMA);
 
-  // If already logged in, redirect away from this page
-  if (user) {
-    const dest = location.state?.from?.pathname || '/items';
-    return <Navigate to={dest} replace />;
-  }
+  // Redirect after auth state resolves — never navigate during render
+  useEffect(() => {
+    if (!loading && user) {
+      const dest = location.state?.from?.pathname || '/items';
+      navigate(dest, { replace: true });
+    }
+  }, [user, loading, navigate, location]);
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -36,14 +38,16 @@ export default function LoginPage() {
     try {
       await login(values.email, values.password);
       addToast('Welcome back!', 'success');
-      const dest = location.state?.from?.pathname || '/items';
-      navigate(dest, { replace: true });
+      // navigation handled by the useEffect above once user state updates
     } catch (err) {
       addToast(err instanceof ApiError ? err.message : 'Login failed.', 'error');
     } finally {
       setSubmitting(false);
     }
   }
+
+  // While auth is loading, render nothing (ProtectedRoute already shows spinner)
+  if (loading) return null;
 
   return (
     <section className="mx-auto max-w-sm space-y-6 py-4">

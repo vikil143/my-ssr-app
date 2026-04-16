@@ -3,22 +3,32 @@ import { apiFetch } from '../lib/api.js';
 
 const AuthContext = createContext(null);
 
-/**
- * AuthProvider — wraps the app and exposes auth state + actions.
- *
- * On mount it calls GET /api/auth/me to restore a session from the
- * httpOnly cookie (if one exists). login / register / logout update
- * both the cookie (server-side) and the in-memory user state.
- */
+// Non-sensitive hint stored in localStorage so we skip the /api/auth/me call
+// (and its 401 console noise) when no session cookie can possibly exist.
+// The real auth token lives in the httpOnly cookie — this is only a UI hint.
+const SESSION_KEY = 'has_session';
+
 export function AuthProvider({ children }) {
   const [user, setUser]       = useState(null);
   const [loading, setLoading] = useState(true);
 
   // Restore session on first render — only runs on the client
   useEffect(() => {
+    // Skip the network call entirely if we know there's no active session
+    if (!localStorage.getItem(SESSION_KEY)) {
+      setLoading(false);
+      return;
+    }
+
     apiFetch('/api/auth/me')
-      .then(setUser)
-      .catch(() => setUser(null))
+      .then((u) => {
+        setUser(u);
+      })
+      .catch(() => {
+        // Cookie expired or was cleared externally — clean up the hint
+        localStorage.removeItem(SESSION_KEY);
+        setUser(null);
+      })
       .finally(() => setLoading(false));
   }, []);
 
@@ -27,6 +37,7 @@ export function AuthProvider({ children }) {
       method: 'POST',
       body: JSON.stringify({ email, password }),
     });
+    localStorage.setItem(SESSION_KEY, '1');
     setUser(u);
     return u;
   }
@@ -36,12 +47,14 @@ export function AuthProvider({ children }) {
       method: 'POST',
       body: JSON.stringify({ name, email, password }),
     });
+    localStorage.setItem(SESSION_KEY, '1');
     setUser(u);
     return u;
   }
 
   async function logout() {
     await apiFetch('/api/auth/logout', { method: 'POST' });
+    localStorage.removeItem(SESSION_KEY);
     setUser(null);
   }
 

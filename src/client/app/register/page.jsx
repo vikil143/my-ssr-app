@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Link, Navigate, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import Button from '../../components/Button.jsx';
 import TextInput from '../../components/TextInput.jsx';
 import { useAuth } from '../../context/AuthContext.jsx';
@@ -15,33 +15,32 @@ const SCHEMA = {
 };
 
 export default function RegisterPage() {
-  const { register, user } = useAuth();
-  const { addToast }       = useToast();
-  const navigate           = useNavigate();
+  const { register, user, loading } = useAuth();
+  const { addToast }                = useToast();
+  const navigate                    = useNavigate();
   const [submitting, setSubmitting] = useState(false);
 
   const { values, errors, handleChange, handleBlur, validate } =
     useFormValidation(SCHEMA);
 
-  // Already logged in — send them away
-  if (user) {
-    return <Navigate to="/items" replace />;
-  }
+  // Redirect already-authenticated users after auth state resolves
+  useEffect(() => {
+    if (!loading && user) {
+      navigate('/items', { replace: true });
+    }
+  }, [user, loading, navigate]);
 
   async function handleSubmit(e) {
     e.preventDefault();
     if (!validate()) return;
 
-    if (values.password !== values.confirmPassword) {
-      // Manual cross-field check — the hook handles single-field rules
-      return;
-    }
+    if (values.password !== values.confirmPassword) return;
 
     setSubmitting(true);
     try {
       await register(values.name, values.email, values.password);
       addToast('Account created! Welcome aboard.', 'success');
-      navigate('/items', { replace: true });
+      // navigation handled by the useEffect above once user state updates
     } catch (err) {
       addToast(err instanceof ApiError ? err.message : 'Registration failed.', 'error');
     } finally {
@@ -51,6 +50,8 @@ export default function RegisterPage() {
 
   const passwordMismatch =
     values.confirmPassword && values.password !== values.confirmPassword;
+
+  if (loading) return null;
 
   return (
     <section className="mx-auto max-w-sm space-y-6 py-4">
