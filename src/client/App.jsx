@@ -3,6 +3,7 @@ import { NavLink, Route, Routes, StaticRouter, useNavigate } from 'react-router-
 import HomePage     from './app/page.jsx';
 import AboutPage    from './app/about/page.jsx';
 import ItemsPage    from './app/items/page.jsx';
+import TasksPage    from './app/tasks/page.jsx';
 import ShowcasePage from './app/showcase/page.jsx';
 import LoginPage    from './app/login/page.jsx';
 import RegisterPage from './app/register/page.jsx';
@@ -72,7 +73,7 @@ function UserMenu() {
   );
 }
 
-function AppShell({ items = [] }) {
+function AppShell({ tasks = [] }) {
   const { user } = useAuth();
 
   const navLinkClassName = ({ isActive }) =>
@@ -103,7 +104,7 @@ function AppShell({ items = [] }) {
                 <NavLink to="/" className={navLinkClassName}>Home</NavLink>
                 <NavLink to="/about" className={navLinkClassName}>About</NavLink>
                 {user && (
-                  <NavLink to="/items" className={navLinkClassName}>Items</NavLink>
+                  <NavLink to="/tasks" className={navLinkClassName}>Tasks</NavLink>
                 )}
                 <NavLink to="/showcase" className={navLinkClassName}>Showcase</NavLink>
               </nav>
@@ -126,7 +127,15 @@ function AppShell({ items = [] }) {
               path="/items"
               element={
                 <ProtectedRoute>
-                  <ItemsPage items={items} />
+                  <ItemsPage items={[]} />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/tasks"
+              element={
+                <ProtectedRoute>
+                  <TasksPage tasks={tasks} />
                 </ProtectedRoute>
               }
             />
@@ -139,13 +148,13 @@ function AppShell({ items = [] }) {
   );
 }
 
-export default function App({ items = [], location }) {
+export default function App({ tasks = [], location }) {
   const appShell = (
     <ThemeProvider>
       <ToastProvider>
         <AuthProvider>
           <ErrorBoundary>
-            <AppShell items={items} />
+            <AppShell tasks={tasks} />
           </ErrorBoundary>
         </AuthProvider>
       </ToastProvider>

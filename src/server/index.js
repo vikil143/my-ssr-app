@@ -3,14 +3,17 @@ require('@babel/register')({ presets: ['@babel/preset-env', '@babel/preset-react
 
 const express      = require('express');
 const cookieParser = require('cookie-parser');
+const jwt          = require('jsonwebtoken');
 const React        = require('react');
 const { renderToString } = require('react-dom/server');
 
-const connect     = require('./db');
-const Item        = require('./models/Item');
-const authRouter  = require('./routes/auth');
-const requireAuth = require('./middleware/auth');
-const App         = require('../client/App').default;
+const connect      = require('./db');
+const Item         = require('./models/Item');
+const Task         = require('./models/Task');
+const authRouter   = require('./routes/auth');
+const tasksRouter  = require('./routes/tasks');
+const requireAuth  = require('./middleware/auth');
+const App          = require('../client/App').default;
 
 const app = express();
 
@@ -21,14 +24,15 @@ app.use(express.static('public'));
 // ── Auth API ────────────────────────────────────────────────────────────────
 app.use('/api/auth', authRouter);
 
-// ── Items API ───────────────────────────────────────────────────────────────
-// GET is public — anyone can read items
+// ── Tasks API ────────────────────────────────────────────────────────────────
+app.use('/api/tasks', tasksRouter);
+
+// ── Items API (kept for backward compatibility) ──────────────────────────────
 app.get('/api/items', async (req, res) => {
   const items = await Item.find().lean();
   res.json(items);
 });
 
-// POST is protected — must be logged in to create items
 app.post('/api/items', requireAuth, async (req, res) => {
   const { name } = req.body;
   if (!name || !String(name).trim()) {
@@ -69,28 +73,39 @@ const preRenderedCache = new Map();
 
 function preRenderPages() {
   for (const route of STATIC_ROUTES) {
-    const html = renderToString(React.createElement(App, { items: [], location: route }));
-    preRenderedCache.set(route, renderPage(html, { items: [] }));
+    const html = renderToString(React.createElement(App, { tasks: [], location: route }));
+    preRenderedCache.set(route, renderPage(html, { tasks: [] }));
     console.log(`Pre-rendered: ${route}`);
   }
 }
 
-// SSR catch-all — static pages served from cache, dynamic pages rendered fresh
+// SSR catch-all — static pages served from cache, /tasks rendered fresh per-user
 app.get(/^\/(?!api).*/, async (req, res) => {
   if (preRenderedCache.has(req.path)) {
     console.log(`Serving pre-rendered: ${req.path}`);
     return res.send(preRenderedCache.get(req.path));
   }
 
-  // Dynamic pages (e.g. /items) still fetch fresh data on every request
-  const items = await Item.find().lean();
-  const html  = renderToString(React.createElement(App, { items, location: req.url }));
-  console.log(`SSR for ${req.url} with ${items.length} items`);
-  res.send(renderPage(html, { items }));
+  // /tasks — fetch the logged-in user's tasks from their JWT cookie
+  let tasks = [];
+  if (req.path === '/tasks') {
+    try {
+      const token = req.cookies.token;
+      if (token) {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        tasks = await Task.find({ userId: decoded.id }).sort({ createdAt: -1 }).lean();
+      }
+    } catch (_) {
+      // Invalid / expired token — leave tasks empty; ProtectedRoute will redirect
+    }
+  }
+
+  const html = renderToString(React.createElement(App, { tasks, location: req.url }));
+  console.log(`SSR for ${req.url} with ${tasks.length} tasks`);
+  res.send(renderPage(html, { tasks }));
 });
 
 // ── Global error handler ─────────────────────────────────────────────────────
-// Must be defined after all routes. Catches any error passed via next(err).
 app.use((err, req, res, next) => {
   console.error(err);
   const status = err.status || err.statusCode || 500;

@@ -4,10 +4,10 @@ import { BrowserRouter } from 'react-router-dom';
 import App from './App.jsx';
 import './styles.css';
 
-const items = window.__DATA__?.items || [];
+const tasks = window.__DATA__?.tasks || [];
 hydrateRoot(
   document.getElementById('root'),
   <BrowserRouter>
-    <App items={items} />
+    <App tasks={tasks} />
   </BrowserRouter>
 );
