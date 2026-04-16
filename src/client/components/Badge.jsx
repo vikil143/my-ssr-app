@@ -1,16 +1,16 @@
 import React from 'react';
 
 const toneClasses = {
-  cyan: 'border-cyan-500/30 bg-cyan-500/10 text-cyan-700 dark:border-cyan-400/30 dark:bg-cyan-400/10 dark:text-cyan-200',
-  emerald: 'border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:border-emerald-400/30 dark:bg-emerald-400/10 dark:text-emerald-200',
-  fuchsia: 'border-fuchsia-500/30 bg-fuchsia-500/10 text-fuchsia-700 dark:border-fuchsia-400/30 dark:bg-fuchsia-400/10 dark:text-fuchsia-200',
-  rose: 'border-rose-500/30 bg-rose-500/10 text-rose-700 dark:border-rose-400/30 dark:bg-rose-400/10 dark:text-rose-200'
+  cyan:    'border-[#0052CC]/20 bg-[#DEEBFF] text-[#0052CC] dark:border-blue-400/30 dark:bg-blue-400/10 dark:text-blue-300',
+  emerald: 'border-[#00875A]/20 bg-[#E3FCEF] text-[#00875A] dark:border-emerald-400/30 dark:bg-emerald-400/10 dark:text-emerald-300',
+  fuchsia: 'border-[#6554C0]/20 bg-[#EAE6FF] text-[#6554C0] dark:border-purple-400/30 dark:bg-purple-400/10 dark:text-purple-300',
+  rose:    'border-[#DE350B]/20 bg-[#FFEBE6] text-[#DE350B] dark:border-red-400/30 dark:bg-red-400/10 dark:text-red-300',
 };
 
 export default function Badge({ children, tone = 'cyan' }) {
   return (
     <span
-      className={`inline-flex rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-[0.25em] ${toneClasses[tone] || toneClasses.cyan}`}
+      className={`inline-flex rounded-full border px-2.5 py-0.5 text-xs font-semibold ${toneClasses[tone] || toneClasses.cyan}`}
     >
       {children}
     </span>

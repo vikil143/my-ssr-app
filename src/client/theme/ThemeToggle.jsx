@@ -6,7 +6,7 @@ export default function ThemeToggle() {
 
   return (
     <button
-      className="rounded-full border border-slate-900/10 bg-white/80 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-white dark:border-white/10 dark:bg-slate-900/70 dark:text-slate-200 dark:hover:bg-slate-900"
+      className="rounded-[3px] border border-white/20 bg-white/10 px-3 py-1.5 text-sm font-medium text-white/80 transition hover:bg-white/20 hover:text-white dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600"
       onClick={toggleTheme}
       type="button"
     >

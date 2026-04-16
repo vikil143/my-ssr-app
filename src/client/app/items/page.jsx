@@ -66,10 +66,10 @@ export default function ItemsPage({ items: initialItems }) {
       {/* ── Header ── */}
       <div className="space-y-3">
         <Badge tone="fuchsia">Items</Badge>
-        <h2 className="text-3xl font-bold tracking-tight text-slate-950 dark:text-white">
+        <h2 className="text-xl font-bold tracking-tight text-j-ink dark:text-white">
           Server data, styled on the client
         </h2>
-        <p className="max-w-2xl text-base leading-7 text-slate-600 dark:text-slate-300">
+        <p className="max-w-2xl text-sm leading-6 text-j-sub dark:text-slate-300">
           This page demonstrates loading states, form validation, toast notifications, and
           client-side API error handling — all wired up together.
         </p>
@@ -77,7 +77,7 @@ export default function ItemsPage({ items: initialItems }) {
 
       {/* ── Add Item Form (validation + toast + API error handling) ── */}
       <Card as="div" className="space-y-4">
-        <p className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
+        <p className="text-xs font-semibold uppercase tracking-[0.15em] text-j-sub dark:text-slate-400">
           Add Item
         </p>
         <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4 sm:flex-row sm:items-end">
@@ -102,7 +102,7 @@ export default function ItemsPage({ items: initialItems }) {
       {/* ── Item List (skeleton loader + refresh) ── */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
+          <p className="text-xs font-semibold uppercase tracking-[0.15em] text-j-mist dark:text-slate-400">
             {items.length} item{items.length !== 1 ? 's' : ''}
           </p>
           <Button onClick={handleRefresh} disabled={listLoading} className="text-xs px-4 py-2">
@@ -114,7 +114,7 @@ export default function ItemsPage({ items: initialItems }) {
         {listLoading ? (
           <SkeletonList count={items.length || 4} />
         ) : items.length === 0 ? (
-          <p className="text-sm text-slate-500 dark:text-slate-400">
+          <p className="text-sm text-j-mist dark:text-slate-400">
             No items yet. Add one above.
           </p>
         ) : (
@@ -123,7 +123,7 @@ export default function ItemsPage({ items: initialItems }) {
               <Card
                 as="li"
                 key={item._id}
-                className="text-sm text-slate-700 dark:bg-slate-950/40 dark:text-slate-200"
+                className="text-sm text-j-ink dark:bg-slate-800 dark:text-slate-200"
               >
                 {item.name}
               </Card>

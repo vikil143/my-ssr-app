@@ -23,7 +23,7 @@ export default function ProtectedRoute({ children }) {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <span className="animate-pulse text-sm text-slate-500 dark:text-slate-400">
+        <span className="animate-pulse text-sm text-j-mist dark:text-slate-400">
           Verifying session…
         </span>
       </div>

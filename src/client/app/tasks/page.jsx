@@ -13,9 +13,9 @@ import { apiFetch, ApiError } from '../../lib/api.js';
 // ── Constants ────────────────────────────────────────────────────────────────
 
 const PRIORITY_CONFIG = {
-  high:   { label: 'High',   tone: 'rose',    dot: 'bg-rose-500 dark:bg-rose-400' },
-  medium: { label: 'Medium', tone: 'cyan',    dot: 'bg-cyan-500 dark:bg-cyan-400' },
-  low:    { label: 'Low',    tone: 'emerald', dot: 'bg-emerald-500 dark:bg-emerald-400' },
+  high:   { label: 'High',   tone: 'rose',    dot: 'bg-j-red' },
+  medium: { label: 'Medium', tone: 'cyan',    dot: 'bg-j-yellow' },
+  low:    { label: 'Low',    tone: 'emerald', dot: 'bg-j-green' },
 };
 
 const STATUS_NEXT   = { todo: 'in-progress', 'in-progress': 'done', done: 'todo' };
@@ -133,10 +133,10 @@ export default function TasksPage({ tasks: initialTasks }) {
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="space-y-3">
           <Badge tone="fuchsia">Tasks</Badge>
-          <h2 className="text-3xl font-bold tracking-tight text-slate-950 dark:text-white">
+          <h2 className="text-xl font-bold tracking-tight text-j-ink dark:text-white">
             My Tasks
           </h2>
-          <p className="max-w-2xl text-base leading-7 text-slate-600 dark:text-slate-300">
+          <p className="max-w-2xl text-sm leading-6 text-j-sub dark:text-slate-300">
             Create tasks, set priorities, and track progress from To Do to Done.
           </p>
         </div>
@@ -148,7 +148,7 @@ export default function TasksPage({ tasks: initialTasks }) {
       {/* ── Add Task form ── */}
       {showForm && (
         <Card as="div" className="space-y-5">
-          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
+          <p className="text-xs font-semibold uppercase tracking-[0.15em] text-j-sub dark:text-slate-400">
             New Task
           </p>
           <form onSubmit={handleSubmit} noValidate className="space-y-4">
@@ -163,7 +163,7 @@ export default function TasksPage({ tasks: initialTasks }) {
               disabled={submitting}
             />
             <div>
-              <label className="mb-1.5 block text-xs font-medium text-slate-600 dark:text-slate-400">
+              <label className="mb-1.5 block text-xs font-medium text-j-sub dark:text-slate-400">
                 Description
               </label>
               <TextArea
@@ -175,7 +175,7 @@ export default function TasksPage({ tasks: initialTasks }) {
               />
             </div>
             <div>
-              <label className="mb-1.5 block text-xs font-medium text-slate-600 dark:text-slate-400">
+              <label className="mb-1.5 block text-xs font-medium text-j-sub dark:text-slate-400">
                 Priority
               </label>
               <Select
@@ -193,7 +193,7 @@ export default function TasksPage({ tasks: initialTasks }) {
                 type="button"
                 onClick={() => setShowForm(false)}
                 disabled={submitting}
-                className="rounded-2xl px-5 py-3 text-sm font-semibold text-slate-600 transition hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
+                className="inline-flex items-center justify-center rounded-[3px] border border-j-line px-4 py-1.5 text-sm font-medium text-j-blue transition hover:bg-j-snow dark:border-slate-600 dark:text-blue-400 dark:hover:bg-slate-800"
               >
                 Cancel
               </button>
@@ -213,10 +213,10 @@ export default function TasksPage({ tasks: initialTasks }) {
             <button
               key={s}
               onClick={() => setStatusFilter(s)}
-              className={`rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-wide transition ${
+              className={`rounded-[3px] px-3 py-1 text-xs font-semibold uppercase tracking-wide transition ${
                 statusFilter === s
-                  ? 'bg-cyan-500 text-white dark:bg-cyan-400 dark:text-slate-950'
-                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700'
+                  ? 'bg-j-blue text-white'
+                  : 'bg-j-snow text-j-sub hover:bg-j-line dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700'
               }`}
             >
               {s === 'all' ? 'All' : STATUS_LABELS[s]}&nbsp;
@@ -243,7 +243,7 @@ export default function TasksPage({ tasks: initialTasks }) {
       {/* ── Task list ── */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
+          <p className="text-xs font-semibold uppercase tracking-[0.15em] text-j-mist dark:text-slate-400">
             {filtered.length} task{filtered.length !== 1 ? 's' : ''}
             {(statusFilter !== 'all' || priorityFilter !== 'all') && ' · filtered'}
           </p>
@@ -255,7 +255,7 @@ export default function TasksPage({ tasks: initialTasks }) {
         {listLoading ? (
           <SkeletonList count={filtered.length || 3} />
         ) : filtered.length === 0 ? (
-          <p className="py-6 text-center text-sm text-slate-500 dark:text-slate-400">
+          <p className="py-8 text-center text-sm text-j-mist dark:text-slate-400">
             {tasks.length === 0
               ? 'No tasks yet. Hit "+ New Task" to get started.'
               : 'No tasks match the current filters.'}
@@ -287,18 +287,18 @@ function TaskCard({ task, onStatusCycle, onDelete }) {
   return (
     <Card
       as="li"
-      className={`flex items-start gap-4 transition-opacity ${isDone ? 'opacity-60' : ''}`}
+      className={`flex items-start gap-3 transition-shadow hover:shadow-md ${isDone ? 'opacity-60' : ''}`}
     >
       {/* Status circle — click to advance: todo → in-progress → done → todo */}
       <button
         onClick={() => onStatusCycle(task)}
         title={`Mark as ${STATUS_LABELS[STATUS_NEXT[task.status]]}`}
-        className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 ${
+        className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-j-sky ${
           isDone
-            ? 'border-emerald-500 bg-emerald-500 dark:border-emerald-400 dark:bg-emerald-400'
+            ? 'border-j-green bg-j-green'
             : isInProgress
-            ? 'border-cyan-500 bg-cyan-100 dark:border-cyan-400 dark:bg-cyan-400/20'
-            : 'border-slate-400 bg-transparent hover:border-slate-600 dark:border-slate-500 dark:hover:border-slate-300'
+            ? 'border-j-blue bg-[#DEEBFF] dark:border-blue-400 dark:bg-blue-400/20'
+            : 'border-j-line bg-transparent hover:border-j-sub dark:border-slate-500 dark:hover:border-slate-300'
         }`}
       >
         {isDone && (
@@ -313,7 +313,7 @@ function TaskCard({ task, onStatusCycle, onDelete }) {
           </svg>
         )}
         {isInProgress && (
-          <span className="h-2 w-2 rounded-full bg-cyan-500 dark:bg-cyan-400" />
+          <span className="h-2 w-2 rounded-full bg-j-blue dark:bg-blue-400" />
         )}
       </button>
 
@@ -323,8 +323,8 @@ function TaskCard({ task, onStatusCycle, onDelete }) {
           <span
             className={`text-sm font-semibold ${
               isDone
-                ? 'text-slate-400 line-through dark:text-slate-500'
-                : 'text-slate-900 dark:text-white'
+                ? 'text-j-mist line-through dark:text-slate-500'
+                : 'text-j-ink dark:text-white'
             }`}
           >
             {task.title}
@@ -338,8 +338,8 @@ function TaskCard({ task, onStatusCycle, onDelete }) {
             <span
               className={`text-xs font-medium ${
                 isDone
-                  ? 'text-emerald-600 dark:text-emerald-400'
-                  : 'text-cyan-600 dark:text-cyan-400'
+                  ? 'text-j-green dark:text-emerald-400'
+                  : 'text-j-blue dark:text-blue-400'
               }`}
             >
               {STATUS_LABELS[task.status]}
@@ -348,7 +348,7 @@ function TaskCard({ task, onStatusCycle, onDelete }) {
         </div>
 
         {task.description && (
-          <p className="mt-1.5 line-clamp-2 text-xs leading-5 text-slate-500 dark:text-slate-400">
+          <p className="mt-1 line-clamp-2 text-xs leading-5 text-j-sub dark:text-slate-400">
             {task.description}
           </p>
         )}
@@ -358,7 +358,7 @@ function TaskCard({ task, onStatusCycle, onDelete }) {
       <button
         onClick={() => onDelete(task._id, task.title)}
         title="Delete task"
-        className="ml-1 shrink-0 rounded-full p-1.5 text-slate-400 transition hover:bg-rose-50 hover:text-rose-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-400 dark:text-slate-500 dark:hover:bg-rose-500/10 dark:hover:text-rose-400"
+        className="shrink-0 rounded-[3px] p-1.5 text-j-mist transition hover:bg-[#FFEBE6] hover:text-j-red focus:outline-none focus-visible:ring-2 focus-visible:ring-j-red dark:text-slate-500 dark:hover:bg-red-500/10 dark:hover:text-red-400"
       >
         <svg viewBox="0 0 16 16" fill="none" className="h-4 w-4">
           <path

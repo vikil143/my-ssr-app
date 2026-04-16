@@ -6,7 +6,7 @@ export default function TextInput({ className = '', error, label, name, ...props
       {label && (
         <label
           htmlFor={name}
-          className="text-xs font-medium text-slate-600 dark:text-slate-400"
+          className="text-xs font-medium text-j-sub dark:text-slate-400"
         >
           {label}
         </label>
@@ -14,15 +14,15 @@ export default function TextInput({ className = '', error, label, name, ...props
       <input
         id={name}
         name={name}
-        className={`w-full rounded-2xl border px-4 py-3 text-sm placeholder:text-slate-400 focus:outline-none dark:placeholder:text-slate-500 ${
+        className={`h-9 w-full rounded-[3px] border-2 px-3 text-sm placeholder:text-j-mist focus:outline-none dark:placeholder:text-slate-500 ${
           error
-            ? 'border-rose-400 bg-rose-500/5 text-rose-900 focus:border-rose-500 dark:border-rose-400/60 dark:bg-rose-400/5 dark:text-rose-100'
-            : 'border-slate-300 bg-white text-slate-950 focus:border-cyan-500 dark:border-white/10 dark:bg-slate-950/60 dark:text-white dark:focus:border-cyan-400'
+            ? 'border-j-red bg-[#FFEBE6]/20 text-j-ink focus:border-j-red dark:border-red-400/60 dark:bg-red-400/5 dark:text-slate-100'
+            : 'border-j-line bg-white text-j-ink focus:border-j-sky dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 dark:focus:border-blue-400'
         } ${className}`.trim()}
         {...props}
       />
       {error && (
-        <p className="text-xs text-rose-600 dark:text-rose-400">{error}</p>
+        <p className="text-xs text-j-red dark:text-red-400">{error}</p>
       )}
     </div>
   );

@@ -3,8 +3,25 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    --color-primary:       #0052CC;
+    --color-primary-dark:  #0747A6;
+    --color-primary-light: #4C9AFF;
+    --color-success:       #00875A;
+    --color-warning:       #FF991F;
+    --color-danger:        #DE350B;
+    --color-text-primary:  #172B4D;
+    --color-text-secondary:#5E6C84;
+    --color-text-muted:    #97A0AF;
+    --color-bg-page:       #F4F5F7;
+    --color-bg-card:       #FFFFFF;
+    --color-border:        #DFE1E6;
+  }
+
   html {
     color-scheme: light;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-size: 14px;
   }
 
   html.dark {
@@ -12,7 +29,8 @@
   }
 
   body {
-    @apply min-h-screen bg-slate-100 text-slate-950 antialiased transition-colors duration-300 dark:bg-slate-950 dark:text-slate-100;
+    @apply min-h-screen bg-j-snow text-j-ink antialiased transition-colors duration-300 dark:bg-slate-950 dark:text-slate-100;
+    line-height: 1.5;
   }
 
   a {

@@ -19,15 +19,15 @@ export default class ErrorBoundary extends React.Component {
       if (this.props.fallback) return this.props.fallback;
 
       return (
-        <div className="rounded-[2rem] border border-rose-500/20 bg-rose-500/10 p-8 text-center">
-          <p className="text-lg font-semibold text-rose-700 dark:text-rose-400">
+        <div className="rounded-[4px] border border-[#DE350B]/20 bg-[#FFEBE6] p-6 text-center">
+          <p className="text-base font-semibold text-j-red dark:text-red-400">
             Something went wrong
           </p>
-          <p className="mt-2 text-sm text-rose-600/80 dark:text-rose-400/70">
+          <p className="mt-1.5 text-sm text-j-sub dark:text-red-400/70">
             {this.state.error?.message || 'An unexpected error occurred.'}
           </p>
           <button
-            className="mt-5 rounded-2xl bg-rose-600 px-5 py-2 text-sm font-semibold text-white transition hover:bg-rose-700 dark:bg-rose-500 dark:hover:bg-rose-400"
+            className="mt-4 inline-flex items-center justify-center rounded-[3px] bg-j-red px-4 py-1.5 text-sm font-medium text-white transition hover:bg-[#BF2600] dark:bg-red-600 dark:hover:bg-red-700"
             onClick={() => this.setState({ hasError: false, error: null })}
           >
             Try again

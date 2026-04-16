@@ -3,14 +3,10 @@ import React, { createContext, useCallback, useContext, useState } from 'react';
 const ToastContext = createContext(null);
 
 const TONE_CLASSES = {
-  success:
-    'border-emerald-500/30 bg-emerald-500/10 text-emerald-800 dark:border-emerald-400/20 dark:bg-emerald-400/10 dark:text-emerald-200',
-  error:
-    'border-rose-500/30 bg-rose-500/10 text-rose-800 dark:border-rose-400/20 dark:bg-rose-400/10 dark:text-rose-200',
-  info:
-    'border-cyan-500/30 bg-cyan-500/10 text-cyan-800 dark:border-cyan-400/20 dark:bg-cyan-400/10 dark:text-cyan-200',
-  warning:
-    'border-amber-500/30 bg-amber-500/10 text-amber-800 dark:border-amber-400/20 dark:bg-amber-400/10 dark:text-amber-200',
+  success: 'border-[#00875A]/25 bg-[#E3FCEF] text-[#006644] dark:border-emerald-400/20 dark:bg-emerald-400/10 dark:text-emerald-200',
+  error:   'border-[#DE350B]/25 bg-[#FFEBE6] text-[#BF2600] dark:border-red-400/20 dark:bg-red-400/10 dark:text-red-200',
+  info:    'border-[#0052CC]/25 bg-[#DEEBFF] text-[#0747A6] dark:border-blue-400/20 dark:bg-blue-400/10 dark:text-blue-200',
+  warning: 'border-[#FF991F]/25 bg-[#FFFAE6] text-[#974F0C] dark:border-amber-400/20 dark:bg-amber-400/10 dark:text-amber-200',
 };
 
 const ICONS = {
@@ -23,7 +19,7 @@ const ICONS = {
 function ToastItem({ id, message, tone = 'info', onRemove }) {
   return (
     <div
-      className={`flex items-start gap-3 rounded-2xl border px-4 py-3 text-sm shadow-lg backdrop-blur ${TONE_CLASSES[tone]}`}
+      className={`flex items-start gap-3 rounded-[4px] border px-4 py-3 text-sm shadow-lg ${TONE_CLASSES[tone]}`}
     >
       <span className="mt-0.5 shrink-0 font-bold">{ICONS[tone]}</span>
       <span className="flex-1 leading-5">{message}</span>

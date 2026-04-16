@@ -56,10 +56,10 @@ export default function RegisterPage() {
   return (
     <section className="mx-auto max-w-sm space-y-6 py-4">
       <div className="space-y-1">
-        <h2 className="text-2xl font-bold tracking-tight text-slate-950 dark:text-white">
+        <h2 className="text-xl font-bold tracking-tight text-j-ink dark:text-white">
           Create account
         </h2>
-        <p className="text-sm text-slate-500 dark:text-slate-400">
+        <p className="text-sm text-j-sub dark:text-slate-400">
           Sign up to start creating items.
         </p>
       </div>
@@ -125,11 +125,11 @@ export default function RegisterPage() {
         </Button>
       </form>
 
-      <p className="text-center text-sm text-slate-500 dark:text-slate-400">
+      <p className="text-center text-sm text-j-sub dark:text-slate-400">
         Already have an account?{' '}
         <Link
           to="/login"
-          className="font-medium text-cyan-600 hover:underline dark:text-cyan-400"
+          className="font-medium text-j-blue hover:underline dark:text-blue-400"
         >
           Sign in
         </Link>

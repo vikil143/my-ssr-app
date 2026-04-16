@@ -24,10 +24,10 @@ function UserMenu() {
         <NavLink
           to="/login"
           className={({ isActive }) =>
-            `rounded-full px-4 py-2 text-sm font-medium transition ${
+            `rounded-[3px] px-3 py-1.5 text-sm font-medium transition ${
               isActive
-                ? 'bg-cyan-500 text-witemshite shadow-lg shadow-cyan-500/30 dark:bg-cyan-400 dark:text-slate-950'
-                : 'text-slate-600 hover:bg-slate-900/5 hover:text-slate-950 dark:text-slate-300 dark:hover:bg-white/10 dark:hover:text-white'
+                ? 'bg-j-blue text-white'
+                : 'text-white/80 hover:bg-white/10 hover:text-white'
             }`
           }
         >
@@ -36,10 +36,10 @@ function UserMenu() {
         <NavLink
           to="/register"
           className={({ isActive }) =>
-            `rounded-full px-4 py-2 text-sm font-medium transition ${
+            `rounded-[3px] px-3 py-1.5 text-sm font-medium transition ${
               isActive
-                ? 'bg-cyan-500 text-white shadow-lg shadow-cyan-500/30 dark:bg-cyan-400 dark:text-slate-950'
-                : 'border border-cyan-500 text-cyan-600 hover:bg-cyan-50 dark:border-cyan-400 dark:text-cyan-400 dark:hover:bg-cyan-400/10'
+                ? 'bg-j-blue text-white'
+                : 'border border-white/30 text-white/80 hover:bg-white/10 hover:text-white'
             }`
           }
         >
@@ -55,16 +55,16 @@ function UserMenu() {
   }
 
   return (
-    <div className="flex items-center gap-3">
-      <span className="hidden text-sm text-slate-600 dark:text-slate-300 sm:block">
+    <div className="flex items-center gap-2">
+      <span className="hidden text-sm text-white/70 sm:block">
         Hi,{' '}
-        <span className="font-semibold text-slate-900 dark:text-white">
+        <span className="font-semibold text-white">
           {user.name}
         </span>
       </span>
       <button
         onClick={handleLogout}
-        className="rounded-full px-4 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-900/5 hover:text-slate-950 dark:text-slate-300 dark:hover:bg-white/10 dark:hover:text-white"
+        className="rounded-[3px] px-3 py-1.5 text-sm font-medium text-white/80 transition hover:bg-white/10 hover:text-white"
       >
         Sign out
       </button>
@@ -76,30 +76,30 @@ function AppShell({ tasks = [] }) {
   const { user } = useAuth();
 
   const navLinkClassName = ({ isActive }) =>
-    `rounded-full px-4 py-2 text-sm font-medium transition ${
+    `rounded-[3px] px-3 py-1.5 text-sm font-medium transition ${
       isActive
-        ? 'bg-cyan-500 text-white shadow-lg shadow-cyan-500/30 dark:bg-cyan-400 dark:text-slate-950'
-        : 'text-slate-600 hover:bg-slate-900/5 hover:text-slate-950 dark:text-slate-300 dark:hover:bg-white/10 dark:hover:text-white'
+        ? 'bg-j-blue text-white'
+        : 'text-white/80 hover:bg-white/10 hover:text-white'
     }`;
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(6,182,212,0.18),_transparent_30%),linear-gradient(180deg,_#f8fafc_0%,_#e2e8f0_48%,_#cbd5e1_100%)] px-4 py-10 transition-colors duration-300 dark:bg-[radial-gradient(circle_at_top,_rgba(34,211,238,0.24),_transparent_35%),linear-gradient(180deg,_#020617_0%,_#0f172a_55%,_#111827_100%)] sm:px-6">
-      <div className="mx-auto max-w-5xl">
-        <header className="mb-8 rounded-[2rem] border border-slate-900/10 bg-white/70 p-6 shadow-2xl shadow-cyan-950/10 backdrop-blur transition-colors duration-300 dark:border-white/10 dark:bg-white/5 dark:shadow-cyan-950/30">
-          <p className="mb-3 text-xs font-semibold uppercase tracking-[0.35em] text-cyan-700 dark:text-cyan-300">
+    <div className="min-h-screen bg-j-snow transition-colors duration-300 dark:bg-slate-950">
+      <div className="mx-auto max-w-6xl">
+        <header className="mb-6 rounded-[4px] border-0 bg-j-navy px-6 py-4 shadow-sm transition-colors duration-300 dark:bg-slate-900">
+          <p className="mb-1 text-xs font-medium uppercase tracking-[0.2em] text-white/50">
             React SSR
           </p>
-          <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
             <div>
-              <h1 className="text-4xl font-black tracking-tight text-slate-950 dark:text-white sm:text-5xl">
+              <h1 className="text-lg font-bold tracking-tight text-white sm:text-xl">
                 My SSR App
               </h1>
-              <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-600 dark:text-slate-300 sm:text-base">
+              <p className="mt-0.5 max-w-2xl text-xs leading-5 text-white/60">
                 Server-rendered routes with a Tailwind-powered client shell and a persistent theme switch.
               </p>
             </div>
-            <div className="flex flex-wrap items-center gap-3">
-              <nav className="flex flex-wrap gap-3">
+            <div className="flex flex-wrap items-center gap-2">
+              <nav className="flex flex-wrap gap-1">
                 <NavLink to="/" className={navLinkClassName}>Home</NavLink>
                 <NavLink to="/about" className={navLinkClassName}>About</NavLink>
                 {user && (
@@ -112,7 +112,7 @@ function AppShell({ tasks = [] }) {
           </div>
         </header>
 
-        <main className="rounded-[2rem] border border-slate-900/10 bg-white/75 p-6 shadow-xl shadow-slate-900/10 backdrop-blur transition-colors duration-300 dark:border-white/10 dark:bg-slate-900/65 dark:shadow-slate-950/40 sm:p-8">
+        <main className="rounded-[4px] border border-j-line bg-white p-6 shadow-sm transition-colors duration-300 dark:border-slate-700 dark:bg-slate-900 sm:p-8">
           <Routes>
             <Route path="/"         element={<HomePage />} />
             <Route path="/about"    element={<AboutPage />} />
