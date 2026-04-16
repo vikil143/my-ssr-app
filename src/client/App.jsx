@@ -4,7 +4,6 @@ import HomePage     from './app/page.jsx';
 import AboutPage    from './app/about/page.jsx';
 import ItemsPage    from './app/items/page.jsx';
 import TasksPage    from './app/tasks/page.jsx';
-import ShowcasePage from './app/showcase/page.jsx';
 import LoginPage    from './app/login/page.jsx';
 import RegisterPage from './app/register/page.jsx';
 import NotFoundPage from './app/not-found.jsx';
@@ -106,7 +105,6 @@ function AppShell({ tasks = [] }) {
                 {user && (
                   <NavLink to="/tasks" className={navLinkClassName}>Tasks</NavLink>
                 )}
-                <NavLink to="/showcase" className={navLinkClassName}>Showcase</NavLink>
               </nav>
               <UserMenu />
               <ThemeToggle />
@@ -118,7 +116,6 @@ function AppShell({ tasks = [] }) {
           <Routes>
             <Route path="/"         element={<HomePage />} />
             <Route path="/about"    element={<AboutPage />} />
-            <Route path="/showcase" element={<ShowcasePage />} />
             <Route path="/login"    element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
 

@@ -68,7 +68,7 @@ function renderPage(html, data) {
 }
 
 // Routes that don't need live DB data — rendered once at startup
-const STATIC_ROUTES = ['/', '/about', '/showcase', '/login', '/register'];
+const STATIC_ROUTES = ['/', '/about', '/login', '/register'];
 const preRenderedCache = new Map();
 
 function preRenderPages() {
