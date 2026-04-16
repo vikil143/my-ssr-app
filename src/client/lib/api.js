@@ -24,6 +24,7 @@ export class ApiError extends Error {
 export async function apiFetch(url, options = {}) {
   try {
     const res = await fetch(url, {
+      credentials: 'include', // send httpOnly auth cookie on every request
       headers: {
         'Content-Type': 'application/json',
         ...options.headers,

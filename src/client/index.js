@@ -4,7 +4,7 @@ import { BrowserRouter } from 'react-router-dom';
 import App from './App.jsx';
 import './styles.css';
 
-const items = window.__DATA__ || [];
+const items = window.__DATA__?.items || [];
 hydrateRoot(
   document.getElementById('root'),
   <BrowserRouter>

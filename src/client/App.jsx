@@ -1,16 +1,80 @@
 import React from 'react';
-import { NavLink, Route, Routes, StaticRouter } from 'react-router-dom';
-import HomePage from './app/page.jsx';
-import AboutPage from './app/about/page.jsx';
-import ItemsPage from './app/items/page.jsx';
+import { NavLink, Route, Routes, StaticRouter, useNavigate } from 'react-router-dom';
+import HomePage     from './app/page.jsx';
+import AboutPage    from './app/about/page.jsx';
+import ItemsPage    from './app/items/page.jsx';
 import ShowcasePage from './app/showcase/page.jsx';
+import LoginPage    from './app/login/page.jsx';
+import RegisterPage from './app/register/page.jsx';
 import NotFoundPage from './app/not-found.jsx';
-import ThemeToggle from './theme/ThemeToggle.jsx';
-import { ThemeProvider } from './theme/ThemeProvider.jsx';
-import ErrorBoundary from './components/ErrorBoundary.jsx';
-import { ToastProvider } from './context/ToastContext.jsx';
+import ThemeToggle  from './theme/ThemeToggle.jsx';
+import { ThemeProvider }  from './theme/ThemeProvider.jsx';
+import ErrorBoundary      from './components/ErrorBoundary.jsx';
+import ProtectedRoute     from './components/ProtectedRoute.jsx';
+import { ToastProvider }  from './context/ToastContext.jsx';
+import { AuthProvider, useAuth } from './context/AuthContext.jsx';
+
+function UserMenu() {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  if (!user) {
+    return (
+      <div className="flex items-center gap-2">
+        <NavLink
+          to="/login"
+          className={({ isActive }) =>
+            `rounded-full px-4 py-2 text-sm font-medium transition ${
+              isActive
+                ? 'bg-cyan-500 text-white shadow-lg shadow-cyan-500/30 dark:bg-cyan-400 dark:text-slate-950'
+                : 'text-slate-600 hover:bg-slate-900/5 hover:text-slate-950 dark:text-slate-300 dark:hover:bg-white/10 dark:hover:text-white'
+            }`
+          }
+        >
+          Sign in
+        </NavLink>
+        <NavLink
+          to="/register"
+          className={({ isActive }) =>
+            `rounded-full px-4 py-2 text-sm font-medium transition ${
+              isActive
+                ? 'bg-cyan-500 text-white shadow-lg shadow-cyan-500/30 dark:bg-cyan-400 dark:text-slate-950'
+                : 'border border-cyan-500 text-cyan-600 hover:bg-cyan-50 dark:border-cyan-400 dark:text-cyan-400 dark:hover:bg-cyan-400/10'
+            }`
+          }
+        >
+          Register
+        </NavLink>
+      </div>
+    );
+  }
+
+  async function handleLogout() {
+    await logout();
+    navigate('/login', { replace: true });
+  }
+
+  return (
+    <div className="flex items-center gap-3">
+      <span className="hidden text-sm text-slate-600 dark:text-slate-300 sm:block">
+        Hi,{' '}
+        <span className="font-semibold text-slate-900 dark:text-white">
+          {user.name}
+        </span>
+      </span>
+      <button
+        onClick={handleLogout}
+        className="rounded-full px-4 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-900/5 hover:text-slate-950 dark:text-slate-300 dark:hover:bg-white/10 dark:hover:text-white"
+      >
+        Sign out
+      </button>
+    </div>
+  );
+}
 
 function AppShell({ items = [] }) {
+  const { user } = useAuth();
+
   const navLinkClassName = ({ isActive }) =>
     `rounded-full px-4 py-2 text-sm font-medium transition ${
       isActive
@@ -36,19 +100,14 @@ function AppShell({ items = [] }) {
             </div>
             <div className="flex flex-wrap items-center gap-3">
               <nav className="flex flex-wrap gap-3">
-                <NavLink to="/" className={navLinkClassName}>
-                  Home
-                </NavLink>
-                <NavLink to="/about" className={navLinkClassName}>
-                  About
-                </NavLink>
-                <NavLink to="/items" className={navLinkClassName}>
-                  Items
-                </NavLink>
-                <NavLink to="/showcase" className={navLinkClassName}>
-                  Showcase
-                </NavLink>
+                <NavLink to="/" className={navLinkClassName}>Home</NavLink>
+                <NavLink to="/about" className={navLinkClassName}>About</NavLink>
+                {user && (
+                  <NavLink to="/items" className={navLinkClassName}>Items</NavLink>
+                )}
+                <NavLink to="/showcase" className={navLinkClassName}>Showcase</NavLink>
               </nav>
+              <UserMenu />
               <ThemeToggle />
             </div>
           </div>
@@ -56,10 +115,22 @@ function AppShell({ items = [] }) {
 
         <main className="rounded-[2rem] border border-slate-900/10 bg-white/75 p-6 shadow-xl shadow-slate-900/10 backdrop-blur transition-colors duration-300 dark:border-white/10 dark:bg-slate-900/65 dark:shadow-slate-950/40 sm:p-8">
           <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/about" element={<AboutPage />} />
-            <Route path="/items" element={<ItemsPage items={items} />} />
+            <Route path="/"         element={<HomePage />} />
+            <Route path="/about"    element={<AboutPage />} />
             <Route path="/showcase" element={<ShowcasePage />} />
+            <Route path="/login"    element={<LoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
+
+            {/* Protected — requires authentication */}
+            <Route
+              path="/items"
+              element={
+                <ProtectedRoute>
+                  <ItemsPage items={items} />
+                </ProtectedRoute>
+              }
+            />
+
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </main>
@@ -72,9 +143,11 @@ export default function App({ items = [], location }) {
   const appShell = (
     <ThemeProvider>
       <ToastProvider>
-        <ErrorBoundary>
-          <AppShell items={items} />
-        </ErrorBoundary>
+        <AuthProvider>
+          <ErrorBoundary>
+            <AppShell items={items} />
+          </ErrorBoundary>
+        </AuthProvider>
       </ToastProvider>
     </ThemeProvider>
   );
