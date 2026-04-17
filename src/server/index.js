@@ -7,6 +7,7 @@ const jwt          = require('jsonwebtoken');
 const React        = require('react');
 const { renderToString } = require('react-dom/server');
 
+const passport     = require('passport');
 const connect      = require('./db');
 const Item         = require('./models/Item');
 const Task         = require('./models/Task');
@@ -20,6 +21,7 @@ const app = express();
 app.use(cookieParser());
 app.use(express.json());
 app.use(express.static('public'));
+app.use(passport.initialize());
 
 // ── Auth API ────────────────────────────────────────────────────────────────
 app.use('/api/auth', authRouter);

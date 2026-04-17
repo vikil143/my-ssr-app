@@ -5,14 +5,15 @@ const UserSchema = new mongoose.Schema(
   {
     name:     { type: String, required: true, trim: true },
     email:    { type: String, required: true, unique: true, lowercase: true, trim: true },
-    password: { type: String, required: true },
+    password: { type: String },          // optional — not set for Google-only accounts
+    googleId: { type: String, sparse: true }, // OAuth provider ID
   },
   { timestamps: true }
 );
 
-// Hash password before saving
+// Hash password before saving (only when a password is present and modified)
 UserSchema.pre('save', async function () {
-  if (!this.isModified('password')) return;
+  if (!this.password || !this.isModified('password')) return;
   this.password = await bcrypt.hash(this.password, 12);
 });
 
