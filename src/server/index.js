@@ -10,6 +10,7 @@ const swaggerUi    = require('swagger-ui-express');
 
 const passport     = require('passport');
 const connect      = require('./db');
+const logger       = require('./utils/logger');
 const Item         = require('./models/Item');
 const Task         = require('./models/Task');
 const authRouter   = require('./routes/auth');
@@ -91,14 +92,14 @@ function preRenderPages() {
   for (const route of STATIC_ROUTES) {
     const html = renderToString(React.createElement(App, { tasks: [], location: route }));
     preRenderedCache.set(route, renderPage(html, { tasks: [] }));
-    console.log(`Pre-rendered: ${route}`);
+    logger.info(`Pre-rendered: ${route}`);
   }
 }
 
 // SSR catch-all — static pages served from cache, /tasks rendered fresh per-user
 app.get(/^\/(?!api).*/, async (req, res) => {
   if (preRenderedCache.has(req.path)) {
-    console.log(`Serving pre-rendered: ${req.path}`);
+    logger.info(`Serving pre-rendered: ${req.path}`);
     return res.send(preRenderedCache.get(req.path));
   }
 
@@ -117,7 +118,7 @@ app.get(/^\/(?!api).*/, async (req, res) => {
   }
 
   const html = renderToString(React.createElement(App, { tasks, location: req.url }));
-  console.log(`SSR for ${req.url} with ${tasks.length} tasks`);
+  logger.info(`SSR for ${req.url} with ${tasks.length} tasks`);
   res.send(renderPage(html, { tasks }));
 });
 
@@ -137,7 +138,7 @@ app.use((err, req, res, next) => {
     return res.status(400).json({ message: 'Invalid ID format.' });
   }
 
-  console.error(err);
+  logger.error(err.message || 'Unhandled error', { stack: err.stack, status: err.status });
   const status = err.status || err.statusCode || 500;
   res.status(status).json({ message: err.message || 'Internal server error.' });
 });
@@ -145,6 +146,6 @@ app.use((err, req, res, next) => {
 connect().then(() => {
   preRenderPages();
   app.listen(process.env.PORT || 3000, () =>
-    console.log(`Server running at http://localhost:${process.env.PORT || 3000}`)
+    logger.info(`Server running at http://localhost:${process.env.PORT || 3000}`)
   );
 });

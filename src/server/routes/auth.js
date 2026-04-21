@@ -5,6 +5,7 @@ const passport    = require('passport');
 const { Strategy: GoogleStrategy } = require('passport-google-oauth20');
 const User        = require('../models/User');
 const requireAuth = require('../middleware/auth');
+const logger      = require('../utils/logger');
 
 const router = express.Router();
 
@@ -95,7 +96,7 @@ router.get('/me', requireAuth, (req, res) => {
 });
 
 // ── Google OAuth ───────────────────────────────────────────────────────────
-console.log('[Google OAuth] Client ID loaded:', process.env.GOOGLE_CLIENT_ID ? process.env.GOOGLE_CLIENT_ID.slice(0, 12) + '...' : 'MISSING');
+logger.info(`[Google OAuth] Client ID loaded: ${process.env.GOOGLE_CLIENT_ID ? process.env.GOOGLE_CLIENT_ID.slice(0, 12) + '...' : 'MISSING'}`);
 
 passport.use(
   new GoogleStrategy(
