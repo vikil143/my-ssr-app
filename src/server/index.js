@@ -11,11 +11,10 @@ const swaggerUi    = require('swagger-ui-express');
 const passport     = require('passport');
 const connect      = require('./db');
 const logger       = require('./utils/logger');
-const Item         = require('./models/Item');
 const Task         = require('./models/Task');
 const authRouter   = require('./routes/auth');
 const tasksRouter  = require('./routes/tasks');
-const requireAuth  = require('./middleware/auth');
+const itemsRouter  = require('./routes/items');
 const swaggerSpec  = require('./swagger');
 const App          = require('../client/App').default;
 
@@ -35,29 +34,8 @@ app.use('/api/auth', authRouter);
 // ── Tasks API ────────────────────────────────────────────────────────────────
 app.use('/api/tasks', tasksRouter);
 
-// ── Items API (kept for backward compatibility) ──────────────────────────────
-app.get('/api/items', async (req, res, next) => {
-  try {
-    const items = await Item.find().sort({ createdAt: -1 }).lean();
-    res.json(items);
-  } catch (err) {
-    next(err);
-  }
-});
-
-app.post('/api/items', requireAuth, async (req, res, next) => {
-  try {
-    const { name } = req.body;
-    const trimmed = String(name ?? '').trim();
-    if (!trimmed) {
-      return res.status(400).json({ message: 'Item name is required.' });
-    }
-    const item = await Item.create({ name: trimmed });
-    res.status(201).json(item);
-  } catch (err) {
-    next(err);
-  }
-});
+// ── Items API ────────────────────────────────────────────────────────────────
+app.use('/api/items', itemsRouter);
 
 // ── SSR ─────────────────────────────────────────────────────────────────────
 function renderPage(html, data) {
