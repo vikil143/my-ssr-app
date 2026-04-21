@@ -6,6 +6,7 @@ const cookieParser = require('cookie-parser');
 const jwt          = require('jsonwebtoken');
 const React        = require('react');
 const { renderToString } = require('react-dom/server');
+const swaggerUi    = require('swagger-ui-express');
 
 const passport     = require('passport');
 const connect      = require('./db');
@@ -14,6 +15,7 @@ const Task         = require('./models/Task');
 const authRouter   = require('./routes/auth');
 const tasksRouter  = require('./routes/tasks');
 const requireAuth  = require('./middleware/auth');
+const swaggerSpec  = require('./swagger');
 const App          = require('../client/App').default;
 
 const app = express();
@@ -22,6 +24,9 @@ app.use(cookieParser());
 app.use(express.json());
 app.use(express.static('public'));
 app.use(passport.initialize());
+
+// ── API Docs ─────────────────────────────────────────────────────────────────
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // ── Auth API ────────────────────────────────────────────────────────────────
 app.use('/api/auth', authRouter);
