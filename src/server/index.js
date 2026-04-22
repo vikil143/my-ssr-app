@@ -11,7 +11,7 @@ const swaggerUi    = require('swagger-ui-express');
 const passport     = require('passport');
 const connect      = require('./db');
 const logger       = require('./utils/logger');
-const Task         = require('./models/Task');
+const taskService  = require('./services/taskService');
 const authRouter   = require('./routes/auth');
 const tasksRouter  = require('./routes/tasks');
 const itemsRouter  = require('./routes/items');
@@ -88,7 +88,7 @@ app.get(/^\/(?!api).*/, async (req, res) => {
       const token = req.cookies.token;
       if (token) {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        tasks = await Task.find({ userId: decoded.id }).sort({ createdAt: -1 }).lean();
+        tasks = await taskService.listTasks(decoded.id);
       }
     } catch (_) {
       // Invalid / expired token — leave tasks empty; ProtectedRoute will redirect

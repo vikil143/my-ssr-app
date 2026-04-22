@@ -2,10 +2,10 @@ const express        = require('express');
 const rateLimit      = require('express-rate-limit');
 const passport       = require('passport');
 const { Strategy: GoogleStrategy } = require('passport-google-oauth20');
-const User           = require('../models/User');
 const requireAuth    = require('../middleware/auth');
 const logger         = require('../utils/logger');
 const authController = require('../controllers/authController');
+const authService    = require('../services/authService');
 
 const router = express.Router();
 
@@ -30,17 +30,7 @@ passport.use(
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
-        const email = profile.emails[0].value.toLowerCase();
-        let user = await User.findOne({ $or: [{ googleId: profile.id }, { email }] });
-
-        if (!user) {
-          user = await User.create({ name: profile.displayName, email, googleId: profile.id });
-        } else if (!user.googleId) {
-          // Existing email/password account — link Google to it
-          user.googleId = profile.id;
-          await user.save();
-        }
-
+        const user = await authService.findOrCreateGoogleUser(profile);
         done(null, user);
       } catch (err) {
         done(err);

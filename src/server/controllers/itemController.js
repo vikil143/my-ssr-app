@@ -1,8 +1,8 @@
-const Item = require('../models/Item');
+const itemService = require('../services/itemService');
 
 exports.getItems = async (req, res, next) => {
   try {
-    const items = await Item.find().sort({ createdAt: -1 }).lean();
+    const items = await itemService.listItems();
     res.json(items);
   } catch (err) {
     next(err);
@@ -11,12 +11,7 @@ exports.getItems = async (req, res, next) => {
 
 exports.createItem = async (req, res, next) => {
   try {
-    const { name } = req.body;
-    const trimmed = String(name ?? '').trim();
-    if (!trimmed) {
-      return res.status(400).json({ message: 'Item name is required.' });
-    }
-    const item = await Item.create({ name: trimmed });
+    const item = await itemService.createItem(req.body);
     res.status(201).json(item);
   } catch (err) {
     next(err);
